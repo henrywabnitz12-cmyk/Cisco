@@ -3,197 +3,883 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>STARCOM 3.0 | Cisco AI</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>STARCOM 5.0 | Cisco AI</title>
+
 <style>
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  background: #07111f;
-  color: #e8f5ff;
-  font-family: Arial, sans-serif;
-  text-align: center;
-  padding: 25px;
+*{box-sizing:border-box}
+
+body{
+ margin:0;
+ padding:18px;
+ background:#06101d;
+ color:#eaf7ff;
+ font-family:Arial,sans-serif;
 }
-h1 { color: #39c5ff; letter-spacing: 4px; }
-.panel {
-  max-width: 600px;
-  margin: 20px auto;
-  padding: 22px;
-  background: #10243a;
-  border: 1px solid #2478a5;
-  border-radius: 18px;
+
+header{
+ text-align:center;
+ padding:22px 10px;
 }
-#status { color: #57e6a1; }
-#log {
-  height: 260px;
-  overflow-y: auto;
-  text-align: left;
-  background: #06101c;
-  padding: 15px;
-  border-radius: 10px;
-  line-height: 1.5;
+
+h1{
+ color:#35c9ff;
+ letter-spacing:5px;
+ margin-bottom:5px;
 }
-button, input {
-  padding: 14px;
-  margin: 6px;
-  border-radius: 10px;
-  border: none;
-  font-size: 16px;
+
+.subtitle{color:#92b9d1}
+
+.container{
+ max-width:850px;
+ margin:auto;
 }
-button {
-  background: #168cc4;
-  color: white;
-  cursor: pointer;
+
+.panel{
+ background:#10243a;
+ border:1px solid #247ba8;
+ border-radius:16px;
+ padding:18px;
+ margin:14px 0;
 }
-button:disabled { opacity: .5; }
-input { width: 65%; }
-.small { color: #9bb6c9; font-size: 13px; }
+
+.status{
+ color:#59e6a2;
+ font-weight:bold;
+}
+
+.status-dot{
+ display:inline-block;
+ width:9px;
+ height:9px;
+ background:#59e6a2;
+ border-radius:50%;
+ margin-right:7px;
+}
+
+button{
+ background:#168cc4;
+ color:white;
+ border:0;
+ border-radius:9px;
+ padding:13px 16px;
+ margin:4px;
+ font-size:15px;
+ cursor:pointer;
+}
+
+button:active{opacity:.7}
+
+input{
+ background:#071525;
+ border:1px solid #28769c;
+ border-radius:9px;
+ padding:14px;
+ color:white;
+ font-size:16px;
+ width:100%;
+}
+
+.chat{
+ height:390px;
+ overflow-y:auto;
+ background:#050c15;
+ border-radius:12px;
+ padding:12px;
+}
+
+.message{
+ padding:12px;
+ border-radius:10px;
+ margin:9px 0;
+ line-height:1.5;
+ overflow-wrap:anywhere;
+}
+
+.henry{background:#123c59}
+.cisco{background:#17412f}
+.system{background:#332b17;color:#ffe5a3}
+
+.controls{
+ display:flex;
+ flex-wrap:wrap;
+ gap:5px;
+ margin-top:10px;
+}
+
+.controls button{flex:1}
+
+.row{
+ display:grid;
+ grid-template-columns:1fr auto;
+ gap:8px;
+ margin-top:12px;
+}
+
+.small{
+ color:#9bb6c9;
+ font-size:12px;
+ line-height:1.5;
+}
+
+.stat{
+ font-size:25px;
+ color:#35c9ff;
+ font-weight:bold;
+}
+
+footer{
+ text-align:center;
+ color:#7596aa;
+ padding:25px;
+}
+
+@media(max-width:500px){
+ body{padding:10px}
+ .chat{height:350px}
+}
 </style>
 </head>
+
 <body>
+<header>
+ <h1>STARCOM</h1>
+ <div class="subtitle">CISCO AI 5.0 — TEAM FLASH COMMUNICATIONS</div>
+</header>
 
-<h1>STARCOM 3.0</h1>
-<p>CISCO AI COMMUNICATIONS SYSTEM</p>
+<div class="container">
 
-<div class="panel">
-  <h2 id="status">SYSTEM STANDBY</h2>
-  <p id="device">Checking microphone support...</p>
-  <button onclick="startListening()">🎙️ TALK TO CISCO</button>
-  <button onclick="stopListening()">⏹ STOP</button>
-  <div id="log"></div>
-  <input id="message" placeholder="Type a message...">
-  <button onclick="sendMessage()">SEND</button>
+ <section class="panel">
+  <div class="status">
+   <span class="status-dot"></span>
+   <span id="status">SYSTEM ONLINE</span>
+  </div>
+  <p id="voiceStatus" class="small">
+   Voice system waiting for microphone permission.
+  </p>
+
+  <div class="controls">
+   <button onclick="startListening()">🎙 TALK</button>
+   <button onclick="stopListening()">⏹ STOP</button>
+   <button onclick="toggleVoice()" id="voiceButton">
+    🔊 VOICE ON
+   </button>
+  </div>
+ </section>
+
+ <section class="panel">
+  <h3>STARCOM COMMUNICATIONS</h3>
+  <div id="chat" class="chat"></div>
+
+  <div class="row">
+   <input id="message" placeholder="Message Cisco...">
+   <button onclick="sendMessage()">SEND</button>
+  </div>
+
+  <div class="controls">
+   <button onclick="quickMessage('Barry Allen')">Barry</button>
+   <button onclick="quickMessage('STAR Labs')">STAR Labs</button>
+   <button onclick="quickMessage('Tell me a joke')">Joke</button>
+   <button onclick="quickMessage('System status')">Status</button>
+  </div>
+ </section>
+
+ <section class="panel">
+  <h3>MISSION MEMORY</h3>
+  <div class="stat" id="memoryCount">0</div>
+  <p class="small">Mission updates stored during this browser session.</p>
+  <button onclick="showMemory()">VIEW MISSION LOG</button>
+  <button onclick="clearMemory()">CLEAR MISSION LOG</button>
+ </section>
+
+ <section class="panel">
+  <h3>AI DATABASE</h3>
+  <div class="stat" id="databaseCount">0</div>
+  <p class="small">Available response records and generated variations.</p>
+ </section>
+
+ <footer>
+  STARCOM 5.0 · FICTIONAL TEAM FLASH COMMUNICATIONS
+ </footer>
 </div>
 
-<p class="small">
-  Headphones recommended. Microphone permission required.
-  This prototype uses browser speech features, not ChatGPT.
-</p>
-
 <script>
-const statusText = document.getElementById("status");
-const log = document.getElementById("log");
-const message = document.getElementById("message");
+/* ===================================
+   STARCOM 5.0
+   LOCAL RESPONSE ENGINE
+=================================== */
 
-const SpeechRecognition =
-  window.SpeechRecognition ||
-  window.webkitSpeechRecognition;
+const chat = document.getElementById("chat");
+const input = document.getElementById("message");
+const statusLabel = document.getElementById("status");
 
-let recognition;
+let voiceEnabled = true;
 let listening = false;
-let missionLog = [];
+let recognition = null;
 
-function addLog(who, text) {
-  const p = document.createElement("p");
-  p.textContent = who + ": " + text;
-  log.appendChild(p);
-  log.scrollTop = log.scrollHeight;
+let memory = {
+ missions: [],
+ people: [],
+ lastMessage: "",
+ lastTopic: "",
+ lastPerson: "",
+ lastReply: "",
+ conversationCount: 0
+};
+
+/* ===================================
+   CISCO PERSONALITY
+=================================== */
+
+const personality = {
+ openers: [
+  "Okay, Henry.",
+  "All right, listen.",
+  "Whoa, hold on.",
+  "Interesting.",
+  "Copy that.",
+  "Well, that's new.",
+  "You know what?",
+  "I've got an idea.",
+  "Okay, genius moment.",
+  "Right, so",
+  "Oh, this is interesting.",
+  "Okay, I'm listening.",
+  "Now we're talking.",
+  "Wait a second.",
+  "I have thoughts about this."
+ ],
+
+ closers: [
+  "I'm keeping track.",
+  "STARCOM is standing by.",
+  "I'll update the mission notes.",
+  "Barry should know about this.",
+  "Let's figure this out.",
+  "I'm on it.",
+  "Keep me updated.",
+  "That's my engineering opinion.",
+  "We're not done investigating.",
+  "Cisco out. Just kidding, I'm still here."
+ ],
+
+ followups: [
+  "What happened next?",
+  "Tell me more, Henry.",
+  "Okay, I'm following.",
+  "What did you see?",
+  "When did that happen?",
+  "And what happened after that?",
+  "I'm listening. Keep going.",
+  "Did anybody else notice?",
+  "Let's investigate that.",
+  "What's the latest?",
+  "Can you explain that part?",
+  "Copy that. Continue.",
+  "Okay, that changes things.",
+  "I'm adding that to the mission notes.",
+  "What should the team know?"
+ ]
+};
+
+/* ===================================
+   TOPIC DATABASE
+=================================== */
+
+const topics = {
+
+ greeting: {
+  keywords:["hello","hey","hi","yo","morning","afternoon"],
+  replies:[
+   "Henry! Cisco AI online. What's happening?",
+   "Hey! Your favorite genius is on comms.",
+   "STARCOM is online. What's the situation?",
+   "Oh good, you're here. I was getting bored.",
+   "Cisco Ramon reporting for duty.",
+   "Hey Henry! How's the mission going?",
+   "Look who decided to call STAR Labs.",
+   "Communications established. What's up?",
+   "Henry! I was just checking the equipment.",
+   "Yo! Tell me what's going on."
+  ]
+ },
+
+ barry: {
+  keywords:["barry","flash","speedster","allen"],
+  replies:[
+   "Barry is probably running faster than his common sense.",
+   "I'll get Barry on the comms.",
+   "That's our favorite scarlet speedster.",
+   "Barry, please stop breaking my technology.",
+   "The Flash is on the move!",
+   "Barry Allen. Fastest guy I know, except when he needs to make a decision.",
+   "I'll check the team channel.",
+   "If Barry is involved, this is probably going to get complicated.",
+   "Tell Barry Cisco says hello.",
+   "Barry needs a reliable support team. Luckily, he has one."
+  ]
+ },
+
+ caitlin: {
+  keywords:["caitlin","snow","killer frost"],
+  replies:[
+   "Caitlin is one of the smartest people at STAR Labs.",
+   "I'll check with Caitlin.",
+   "Caitlin probably already has three theories.",
+   "Let's get Caitlin's opinion.",
+   "Medical and science support. That's Caitlin's department.",
+   "I'll send that information to Caitlin.",
+   "Caitlin always knows how to approach a difficult problem."
+  ]
+ },
+
+ hr: {
+  keywords:["h.r.","hr wells","h r wells"],
+  replies:[
+   "H.R. Wells. Never a dull moment.",
+   "I wonder what H.R. is working on.",
+   "That man has a lot of ideas.",
+   "I'll check with H.R.",
+   "One Wells is complicated enough. We have multiple."
+  ]
+ },
+
+ harry: {
+  keywords:["harry","harry wells"],
+  replies:[
+   "Harry Wells. Brilliant, but not exactly cheerful.",
+   "I'll see what Harry thinks.",
+   "Harry's scientific knowledge could help.",
+   "Let's get Harry involved.",
+   "You know Harry. Straight to the point."
+  ]
+ },
+
+ zoom: {
+  keywords:["zoom"],
+  replies:[
+   "Zoom is not somebody we should underestimate.",
+   "I'll mark Zoom as a priority threat.",
+   "We need a plan before confronting him.",
+   "Barry deserves a fighting chance.",
+   "Let's get the team together.",
+   "That name is not one I enjoy hearing."
+  ]
+ },
+
+ starLabs: {
+  keywords:["star labs","starlabs","laboratory","lab"],
+  replies:[
+   "Welcome to STAR Labs, where the impossible is Tuesday.",
+   "I'll check the lab systems.",
+   "Please don't touch the mysterious glowing equipment.",
+   "STAR Labs is ready for another experiment.",
+   "Another day, another scientific emergency.",
+   "Home sweet laboratory.",
+   "I wonder what broke this time."
+  ]
+ },
+
+ suit: {
+  keywords:["suit","costume","armor","helmet","wrist device"],
+  replies:[
+   "The suit should work for you, not the other way around.",
+   "Let's check the suit's simulated diagnostics.",
+   "I'm putting that issue in the engineering log.",
+   "We need reliable manual controls.",
+   "I designed technology to help people, Henry.",
+   "Let's keep the communications system independent.",
+   "The suit needs to be dependable."
+  ]
+ },
+
+ technology: {
+  keywords:["computer","technology","device","system","software","code"],
+  replies:[
+   "Now THAT is an interesting engineering problem.",
+   "Give me a second. My genius is processing.",
+   "Let's run through the diagnostics.",
+   "Technology is amazing when it works.",
+   "I think we can improve that.",
+   "Engineering is basically problem-solving with better coffee.",
+   "Let's break this problem into smaller pieces.",
+   "I have a few ideas."
+  ]
+ },
+
+ metahuman: {
+  keywords:["metahuman","meta human","metas","powers","power"],
+  replies:[
+   "Metahuman activity? That's worth investigating.",
+   "Okay, that's definitely not ordinary.",
+   "Let's get the team updated.",
+   "I'll add that to the mission notes.",
+   "We need to understand what we're dealing with.",
+   "Another unusual day in Central City.",
+   "Let's be careful and prioritize everyone's safety."
+  ]
+ },
+
+ hacking: {
+  keywords:["hack","hacked","hacking","virus","breach"],
+  replies:[
+   "That's a potential security breach.",
+   "Whoever is doing that needs to learn some manners.",
+   "I'll mark the system as compromised in our simulation.",
+   "Let's keep communications separate from the suit.",
+   "We need to check the system status.",
+   "No unauthorized access on my watch."
+  ]
+ },
+
+ mission: {
+  keywords:["mission","objective","task","assignment"],
+  replies:[
+   "Mission log is ready. Give me the latest update.",
+   "What's our objective, Henry?",
+   "I'll keep track of the mission details.",
+   "Let's get the team organized.",
+   "What's the current situation?",
+   "Every mission needs a plan."
+  ]
+ },
+
+ jokes: {
+  keywords:["joke","funny","laugh","humor"],
+  replies:[
+   "Why did the speedster cross the road? He was already on the other side.",
+   "I tried to build a time machine. I kept going back to the drawing board.",
+   "My computer told me it needed a break. I said, take five.",
+   "I'm not saying I'm a genius, but my coffee maker respects me.",
+   "Barry runs fast. I make fast decisions. Usually.",
+   "Why don't scientists trust atoms? They make up everything.",
+   "I told a chemistry joke, but there was no reaction."
+  ]
+ },
+
+ feelings: {
+  keywords:["sad","upset","angry","worried","scared","nervous"],
+  replies:[
+   "Hey Henry, take a breath. We can work through this.",
+   "I'm listening. You don't have to figure everything out at once.",
+   "The team has your back.",
+   "Let's slow down and work out what's happening.",
+   "It's okay to ask for help."
+  ]
+ },
+
+ thanks: {
+  keywords:["thank you","thanks","thx"],
+  replies:[
+   "Anytime, Henry. That's what genius-level engineering is for.",
+   "No problem! Cisco AI never clocks out.",
+   "You're welcome. I'll put that in my imaginary résumé.",
+   "Hey, that's what friends and teammates are for.",
+   "You got it."
+  ]
+ },
+
+ goodbye: {
+  keywords:["goodbye","bye","see you","signing off"],
+  replies:[
+   "Cisco signing off. Don't blow up the lab!",
+   "Later, Henry. STARCOM out.",
+   "Catch you later!",
+   "I'll keep the channel ready.",
+   "See you on the next mission."
+  ]
+ },
+
+ centralCity: {
+  keywords:["central city","city"],
+  replies:[
+   "Central City. Home of the Flash and approximately one million emergencies.",
+   "We keep Central City safe.",
+   "Central City is our priority.",
+   "The city needs Team Flash."
+  ]
+ },
+
+ loveTeam: {
+  keywords:["team flash","team","friends","family"],
+  replies:[
+   "Team Flash sticks together.",
+   "We've got a pretty incredible team.",
+   "Everybody has a part to play.",
+   "That's what makes this team work.",
+   "Nobody has to solve every problem alone."
+  ]
+ },
+
+ self: {
+  keywords:["who are you","your name","about yourself"],
+  replies:[
+   "Cisco Ramon. Engineer, inventor, occasional vibe enthusiast.",
+   "I'm Cisco. I build the technology that helps Team Flash.",
+   "The name is Cisco Ramon. Nice to meet you.",
+   "I'm the guy who makes the impossible look slightly less impossible."
+  ]
+ }
+};
+
+/* ===================================
+   RESPONSE DATABASE EXPANSION
+=================================== */
+
+const database=[];
+
+for(const [topic,data] of Object.entries(topics)){
+ for(const reply of data.replies){
+  database.push({topic,text:reply});
+ }
+
+ for(const opener of personality.openers){
+  for(const closer of personality.closers){
+   database.push({
+    topic,
+    text:opener+" "+data.replies[0]+" "+closer
+   });
+  }
+ }
 }
 
-function speak(text) {
+document.getElementById("databaseCount").textContent =
+ database.length.toLocaleString();
+
+/* ===================================
+   CHAT DISPLAY
+=================================== */
+
+function addMessage(who,text,type){
+ const div=document.createElement("div");
+ div.className="message "+type;
+ div.textContent=who+": "+text;
+ chat.appendChild(div);
+ chat.scrollTop=chat.scrollHeight;
+}
+
+/* ===================================
+   VOICE ENGINE
+=================================== */
+
+function speak(text){
+ if(!voiceEnabled || !window.speechSynthesis)return;
+
+ speechSynthesis.cancel();
+
+ const utterance=new SpeechSynthesisUtterance(text);
+ utterance.rate=1.04;
+ utterance.pitch=1.08;
+
+ speechSynthesis.speak(utterance);
+}
+
+function toggleVoice(){
+ voiceEnabled=!voiceEnabled;
+
+ document.getElementById("voiceButton").textContent =
+ voiceEnabled ? "🔊 VOICE ON" : "🔇 VOICE OFF";
+
+ if(!voiceEnabled && window.speechSynthesis){
   speechSynthesis.cancel();
-  const speech = new SpeechSynthesisUtterance(text);
-  speech.rate = 1.05;
-  speech.pitch = 1.0;
-  speechSynthesis.speak(speech);
+ }
 }
 
-function ciscoReply(input) {
-  const text = input.toLowerCase();
+/* ===================================
+   MEMORY ENGINE
+=================================== */
 
-  if (text.includes("hello") || text.includes("hey")) {
-    return "Hey Henry! Cisco AI is online. What's happening?";
-  }
+function saveMission(text){
+ memory.missions.push({
+  text,
+  time:new Date().toLocaleTimeString()
+ });
 
-  if (text.includes("barry")) {
-    return "Barry is on the team channel. I'll keep track of your mission.";
-  }
-
-  if (text.includes("status")) {
-    return "STARCOM is online. Communications are operational.";
-  }
-
-  if (text.includes("mission")) {
-    return "Mission log is ready. Tell me what's happening, Henry.";
-  }
-
-  if (text.includes("hack")) {
-    return "Whoa! Possible hacking attempt. Keep your real devices safe and don't dismantle electronics.";
-  }
-
-  if (text.includes("help")) {
-    return "Cisco to Henry! Tell me what's wrong and we'll work through it.";
-  }
-
-  if (text.includes("shutdown")) {
-    stopListening();
-    return "STARCOM signing off. Later, Henry!";
-  }
-
-  return "Interesting, Henry. Tell me more. I'm listening and keeping track of the mission.";
+ document.getElementById("memoryCount").textContent =
+ memory.missions.length;
 }
 
-function sendMessage() {
-  const text = message.value.trim();
-  if (!text) return;
+function showMemory(){
+ if(!memory.missions.length){
+  addMessage("CISCO","No mission updates recorded yet.","cisco");
+  return;
+ }
 
-  addLog("HENRY", text);
-  missionLog.push(text);
-
-  const reply = ciscoReply(text);
-  addLog("CISCO AI", reply);
-  speak(reply);
-
-  message.value = "";
+ addMessage(
+  "CISCO",
+  "Here's what I remember: "+memory.missions
+   .slice(-10)
+   .map(m=>m.text)
+   .join(" | "),
+  "cisco"
+ );
 }
 
-function startListening() {
-  if (!SpeechRecognition) {
-    statusText.textContent = "BROWSER NOT SUPPORTED";
-    addLog("SYSTEM", "Try Chrome or Edge with speech recognition support.");
-    return;
-  }
-
-  if (!recognition) {
-    recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = false;
-    recognition.lang = "en-US";
-
-    recognition.onresult = event => {
-      const result =
-        event.results[event.results.length - 1][0].transcript;
-
-      message.value = result;
-      sendMessage();
-    };
-
-    recognition.onerror = event => {
-      addLog("SYSTEM", "Microphone: " + event.error);
-    };
-
-    recognition.onend = () => {
-      if (listening) recognition.start();
-    };
-  }
-
-  listening = true;
-  statusText.textContent = "STARCOM LISTENING";
-  recognition.start();
+function clearMemory(){
+ memory.missions=[];
+ document.getElementById("memoryCount").textContent="0";
+ addMessage("SYSTEM","Mission memory cleared.","system");
 }
 
-function stopListening() {
-  listening = false;
-  if (recognition) recognition.stop();
+/* ===================================
+   INTENT DETECTION
+=================================== */
+
+function findTopics(text){
+ const t=text.toLowerCase();
+ const found=[];
+
+ for(const [name,data] of Object.entries(topics)){
+  if(data.keywords.some(k=>t.includes(k))){
+   found.push(name);
+  }
+ }
+
+ return found;
+}
+
+/* ===================================
+   CISCO RESPONSE ENGINE
+=================================== */
+
+function randomItem(array){
+ return array[Math.floor(Math.random()*array.length)];
+}
+
+function replyTo(message){
+ const text=message.trim();
+ const t=text.toLowerCase();
+
+ if(!text)return "I'm listening, Henry.";
+
+ if(t.includes("what did i say") ||
+    t.includes("remember my mission") ||
+    t.includes("mission log")){
+  if(!memory.missions.length){
+   return "I haven't recorded any mission updates yet.";
+  }
+
+  return "Here's what I remember: "+
+   memory.missions.slice(-5).map(m=>m.text).join("; ");
+ }
+
+ if(t.includes("what happened before") ||
+    t.includes("what were we talking about")){
+  return memory.lastMessage
+   ? "Your previous update was: "+memory.lastMessage
+   : "We haven't discussed anything yet.";
+ }
+
+ if(t.includes("how many messages")){
+  return "We've exchanged "+memory.conversationCount+" messages this session.";
+ }
+
+ if(t.includes("repeat that")){
+  return memory.lastReply || "I haven't said anything yet.";
+ }
+
+ if(t.includes("who am i")){
+  return "You're Henry, and you're on the STARCOM team channel.";
+ }
+
+ if(t.includes("what time")){
+  return "The current time on this device is "+new Date().toLocaleTimeString()+".";
+ }
+
+ if(t.includes("what date") || t.includes("what day")){
+  return "Today is "+new Date().toLocaleDateString()+".";
+ }
+
+ if(t.includes("stop talking")){
+  stopListening();
+  return "Okay. I'll keep quiet until you need me.";
+ }
+
+ if(t.includes("clear mission")){
+  clearMemory();
+  return "Mission notes cleared.";
+ }
+
+ if(t.includes("what happened") &&
+    memory.lastMessage){
+  return "The latest thing you told me was: "+memory.lastMessage;
+ }
+
+ const found=findTopics(t);
+
+ if(found.length){
+  const topic=found[0];
+  const candidates=database.filter(x=>x.topic===topic);
+
+  const result=randomItem(candidates).text;
+
+  if(found.length>1){
+   return result+" "+randomItem(personality.followups);
+  }
+
+  return result;
+ }
+
+ if(t.startsWith("i am ") ||
+    t.startsWith("i'm ") ||
+    t.startsWith("the suit ") ||
+    t.startsWith("he ") ||
+    t.startsWith("she ") ||
+    t.startsWith("they ")){
+  saveMission(text);
+  return "Copy that, Henry. I've added that update to the mission log. What happened next?";
+ }
+
+ if(t.includes("again")){
+  if(memory.lastMessage){
+   return "Again? Is this connected to what you just told me about "+
+    memory.lastMessage+"? Tell me what changed.";
+  }
+ }
+
+ if(t.endsWith("?")){
+  return randomItem([
+   "That's a good question, Henry. Let's think it through.",
+   "I have a few theories. Can you give me more details?",
+   "Interesting question. What have you figured out so far?",
+   "Let's investigate that together.",
+   "I need a little more information before I can give you a confident answer."
+  ]);
+ }
+
+ if(t.length>30){
+  saveMission(text);
+  return randomItem([
+   "Copy that. I've saved your update. Keep going.",
+   "That's a lot to process. I'm keeping track.",
+   "Okay, Henry. I've added that to our mission notes.",
+   "I'm following. What happened after that?",
+   "Interesting development. The team should know."
+  ]);
+ }
+
+ return randomItem([
+  "I'm listening, Henry. Tell me more.",
+  "Copy that. What's next?",
+  "Interesting. Can you explain a little more?",
+  "Okay, I'm following.",
+  "STARCOM received your message.",
+  "I'm here. Keep talking.",
+  "Let's work through that.",
+  "What else should I know?",
+  "Give me the details.",
+  "I've got you on comms."
+ ]);
+}
+
+/* ===================================
+   SEND MESSAGE
+=================================== */
+
+function sendMessage(){
+ const text=input.value.trim();
+ if(!text)return;
+
+ addMessage("HENRY",text,"henry");
+
+ memory.lastMessage=text;
+ memory.conversationCount++;
+
+ const answer=replyTo(text);
+ memory.lastReply=answer;
+
+ addMessage("CISCO AI",answer,"cisco");
+ speak(answer);
+
+ input.value="";
+}
+
+function quickMessage(text){
+ input.value=text;
+ sendMessage();
+}
+
+input.addEventListener("keydown",e=>{
+ if(e.key==="Enter")sendMessage();
+});
+
+/* ===================================
+   MICROPHONE
+=================================== */
+
+const Recognition=
+ window.SpeechRecognition ||
+ window.webkitSpeechRecognition;
+
+function startListening(){
+ if(!Recognition){
+  addMessage(
+   "SYSTEM",
+   "Speech recognition isn't supported in this browser. Try a compatible browser.",
+   "system"
+  );
+  return;
+ }
+
+ if(listening)return;
+
+ recognition=new Recognition();
+ recognition.lang="en-US";
+ recognition.continuous=true;
+ recognition.interimResults=false;
+
+ recognition.onresult=e=>{
+  const result=e.results[e.results.length-1][0].transcript;
+  input.value=result;
+  sendMessage();
+ };
+
+ recognition.onerror=e=>{
+  document.getElementById("voiceStatus").textContent=
+   "Microphone issue: "+e.error;
+ };
+
+ recognition.onend=()=>{
+  if(listening){
+   try{recognition.start()}catch(error){}
+  }
+ };
+
+ listening=true;
+ statusLabel.textContent="MICROPHONE ACTIVE";
+ document.getElementById("voiceStatus").textContent=
+  "Listening through your selected microphone.";
+
+ try{recognition.start()}catch(error){}
+}
+
+function stopListening(){
+ listening=false;
+
+ if(recognition){
+  recognition.onend=null;
+  recognition.stop();
+ }
+
+ if(window.speechSynthesis){
   speechSynthesis.cancel();
-  statusText.textContent = "SYSTEM STANDBY";
+ }
+
+ statusLabel.textContent="SYSTEM ONLINE";
+ document.getElementById("voiceStatus").textContent=
+  "Microphone stopped.";
 }
 
-document.getElementById("device").textContent =
-  SpeechRecognition
-    ? "Speech recognition supported. Connect your headphones."
-    : "Speech recognition may not be supported in this browser.";
+/* ===================================
+   STARTUP
+=================================== */
+
+addMessage(
+ "CISCO AI",
+ "STARCOM 5.0 online! Henry, can you hear me? I've got the team channel ready.",
+ "cisco"
+);
+
 </script>
 </body>
 </html>
