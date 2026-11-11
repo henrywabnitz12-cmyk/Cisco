@@ -1,0 +1,199 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>STARCOM 3.0 | Cisco AI</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: #07111f;
+  color: #e8f5ff;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 25px;
+}
+h1 { color: #39c5ff; letter-spacing: 4px; }
+.panel {
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 22px;
+  background: #10243a;
+  border: 1px solid #2478a5;
+  border-radius: 18px;
+}
+#status { color: #57e6a1; }
+#log {
+  height: 260px;
+  overflow-y: auto;
+  text-align: left;
+  background: #06101c;
+  padding: 15px;
+  border-radius: 10px;
+  line-height: 1.5;
+}
+button, input {
+  padding: 14px;
+  margin: 6px;
+  border-radius: 10px;
+  border: none;
+  font-size: 16px;
+}
+button {
+  background: #168cc4;
+  color: white;
+  cursor: pointer;
+}
+button:disabled { opacity: .5; }
+input { width: 65%; }
+.small { color: #9bb6c9; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<h1>STARCOM 3.0</h1>
+<p>CISCO AI COMMUNICATIONS SYSTEM</p>
+
+<div class="panel">
+  <h2 id="status">SYSTEM STANDBY</h2>
+  <p id="device">Checking microphone support...</p>
+  <button onclick="startListening()">🎙️ TALK TO CISCO</button>
+  <button onclick="stopListening()">⏹ STOP</button>
+  <div id="log"></div>
+  <input id="message" placeholder="Type a message...">
+  <button onclick="sendMessage()">SEND</button>
+</div>
+
+<p class="small">
+  Headphones recommended. Microphone permission required.
+  This prototype uses browser speech features, not ChatGPT.
+</p>
+
+<script>
+const statusText = document.getElementById("status");
+const log = document.getElementById("log");
+const message = document.getElementById("message");
+
+const SpeechRecognition =
+  window.SpeechRecognition ||
+  window.webkitSpeechRecognition;
+
+let recognition;
+let listening = false;
+let missionLog = [];
+
+function addLog(who, text) {
+  const p = document.createElement("p");
+  p.textContent = who + ": " + text;
+  log.appendChild(p);
+  log.scrollTop = log.scrollHeight;
+}
+
+function speak(text) {
+  speechSynthesis.cancel();
+  const speech = new SpeechSynthesisUtterance(text);
+  speech.rate = 1.05;
+  speech.pitch = 1.0;
+  speechSynthesis.speak(speech);
+}
+
+function ciscoReply(input) {
+  const text = input.toLowerCase();
+
+  if (text.includes("hello") || text.includes("hey")) {
+    return "Hey Henry! Cisco AI is online. What's happening?";
+  }
+
+  if (text.includes("barry")) {
+    return "Barry is on the team channel. I'll keep track of your mission.";
+  }
+
+  if (text.includes("status")) {
+    return "STARCOM is online. Communications are operational.";
+  }
+
+  if (text.includes("mission")) {
+    return "Mission log is ready. Tell me what's happening, Henry.";
+  }
+
+  if (text.includes("hack")) {
+    return "Whoa! Possible hacking attempt. Keep your real devices safe and don't dismantle electronics.";
+  }
+
+  if (text.includes("help")) {
+    return "Cisco to Henry! Tell me what's wrong and we'll work through it.";
+  }
+
+  if (text.includes("shutdown")) {
+    stopListening();
+    return "STARCOM signing off. Later, Henry!";
+  }
+
+  return "Interesting, Henry. Tell me more. I'm listening and keeping track of the mission.";
+}
+
+function sendMessage() {
+  const text = message.value.trim();
+  if (!text) return;
+
+  addLog("HENRY", text);
+  missionLog.push(text);
+
+  const reply = ciscoReply(text);
+  addLog("CISCO AI", reply);
+  speak(reply);
+
+  message.value = "";
+}
+
+function startListening() {
+  if (!SpeechRecognition) {
+    statusText.textContent = "BROWSER NOT SUPPORTED";
+    addLog("SYSTEM", "Try Chrome or Edge with speech recognition support.");
+    return;
+  }
+
+  if (!recognition) {
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.lang = "en-US";
+
+    recognition.onresult = event => {
+      const result =
+        event.results[event.results.length - 1][0].transcript;
+
+      message.value = result;
+      sendMessage();
+    };
+
+    recognition.onerror = event => {
+      addLog("SYSTEM", "Microphone: " + event.error);
+    };
+
+    recognition.onend = () => {
+      if (listening) recognition.start();
+    };
+  }
+
+  listening = true;
+  statusText.textContent = "STARCOM LISTENING";
+  recognition.start();
+}
+
+function stopListening() {
+  listening = false;
+  if (recognition) recognition.stop();
+  speechSynthesis.cancel();
+  statusText.textContent = "SYSTEM STANDBY";
+}
+
+document.getElementById("device").textContent =
+  SpeechRecognition
+    ? "Speech recognition supported. Connect your headphones."
+    : "Speech recognition may not be supported in this browser.";
+</script>
+</body>
+</html>
